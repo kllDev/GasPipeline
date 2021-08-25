@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="gis-tool-0.1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/src/main/resources/lib/gis-tool-0.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
