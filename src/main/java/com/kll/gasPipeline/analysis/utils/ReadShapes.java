@@ -47,19 +47,33 @@ public class ReadShapes {
 //                nodes.add(node);
             }
         }
-        PipeLine line = new PipeLine("9530c7a0-1ec5-4948-91d5-b864595c877c");
-        int i = PipeTopo.lines.indexOf(line);
-        PipeLine problemLine = PipeTopo.lines.get(i);
-        List<PipeNode> relateNodes = problemLine.getNodes();
-        PipeValves pipeValves = new PipeValves();
-        for (PipeNode relateNode : relateNodes) {
-            fmPoints(relateNode,pipeValves);
+//        PipeLine line = new PipeLine("9fe708e8-e035-4db5-a126-cef5026e8956");
+//        int i = PipeTopo.lines.indexOf(line);
+//        PipeLine problemLine = PipeTopo.lines.get(i);
+//        List<PipeNode> relateNodes = problemLine.getNodes();
+//        PipeValves pipeValves = new PipeValves();
+//        for (PipeNode relateNode : relateNodes) {
+//            fmPoints(relateNode, pipeValves);
+//        }
+        for (int i = 0; i < PipeTopo.lines.size(); i++) {
+            PipeLine line = PipeTopo.lines.get(i);
+            int index = PipeTopo.lines.indexOf(line);
+            PipeLine problemLine = PipeTopo.lines.get(index);
+            List<PipeNode> relateNodes = problemLine.getNodes();
+            PipeValves pipeValves = new PipeValves();
+            for (PipeNode relateNode : relateNodes) {
+                fmPoints(relateNode,pipeValves);
+            }
+            if (pipeValves.valveIds.size() < 2) {
+                System.out.println(123);
+            }
+            PipeTopo.lines.get(i).fmIds = pipeValves.valveIds;
         }
         System.out.println(123);
     }
 
     public static void fmPoints(PipeNode node, PipeValves valves) {
-        if (!valves.solvedNodeIds.contains(node.hashCode())) {
+        if (!valves.solvedNodeIds.contains(node.point)) {
             if (node.getId() != null) {
                 valves.valveIds.add(node.getId());
             } else {
@@ -69,8 +83,8 @@ public class ReadShapes {
                         valves.solvedLineIds.add(line.getId());
                         List<PipeNode> nodes = line.getNodes();
                         for (PipeNode pipeNode : nodes) {
-                            valves.solvedNodeIds.add(node.hashCode());
                             fmPoints(pipeNode, valves);
+                            valves.solvedNodeIds.add(node.point);
                         }
                     }
                 }

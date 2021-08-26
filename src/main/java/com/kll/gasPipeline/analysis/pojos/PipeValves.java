@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class PipeValves {
     public Set<String> valveIds;
-    public Set<Integer> solvedNodeIds;
+    public Set<Point3D> solvedNodeIds;
     public Set<String> solvedLineIds;
 
     public PipeValves() {

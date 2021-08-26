@@ -11,6 +11,7 @@ public class PipeLine {
     private List<PipeNode> nodes;
     private String wkt;
     private String id;
+    public Set<String> fmIds;
 
     public PipeLine(Map<String, Object> prop) {
         this.prop = prop;
