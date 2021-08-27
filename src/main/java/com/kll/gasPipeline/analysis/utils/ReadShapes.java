@@ -8,25 +8,32 @@ import com.kll.gasPipeline.analysis.pojos.PipeValves;
 import com.kll.gasPipeline.geo.geotools.ShpTools;
 import com.kll.gasPipeline.geo.pojos.ShpDatas;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.charset.Charset;
 import java.util.*;
 
 public class ReadShapes {
     public static void main(String[] args) throws Exception {
+        PipeTopo topo = new PipeTopo();
         List<String> paths = new ArrayList<>();
-//        paths.add("F:\\data\\shape\\天然气低压穿越.shp");
-//        paths.add("F:\\data\\shape\\天然气低压架空.shp");
-//        paths.add("F:\\data\\shape\\天然气低压桥管.shp");
-//        paths.add("F:\\data\\shape\\天然气低压直埋.shp");
+        paths.add("F:\\data\\shape\\天然气低压穿越.shp");
+        paths.add("F:\\data\\shape\\天然气低压架空.shp");
+        paths.add("F:\\data\\shape\\天然气低压桥管.shp");
+        paths.add("F:\\data\\shape\\天然气低压直埋.shp");
         paths.add("F:\\data\\shape\\天然气中压B穿越.shp");
         paths.add("F:\\data\\shape\\天然气中压B架空.shp");
         paths.add("F:\\data\\shape\\天然气中压B桥管.shp");
         paths.add("F:\\data\\shape\\天然气中压B直埋.shp");
+        int size = 0;
         for (String path : paths) {
             ShpDatas shpLines = ShpTools.readShpByPath(path, null, Charset.forName("GBK"));
             List<Map<String, Object>> props = shpLines.getProps();
+            size += props.size();
             for (int i = 0; i < props.size(); i++) {
                 PipeLine line = new PipeLine(props.get(i));
+                topo.addLine(line);
 //                List<PipeNode> lineNodes = line.getNodes();
 //                nodes.addAll(nodes);
 //                lines.add(line);
@@ -44,51 +51,126 @@ public class ReadShapes {
             ShpDatas points = ShpTools.readShpByPath(path, null, Charset.forName("GBK"));
             for (Map<String, Object> prop : points.getProps()) {
                 PipeNode node = new PipeNode(prop);
+                topo.addNode(node);
+
 //                nodes.add(node);
             }
         }
-//        PipeLine line = new PipeLine("9fe708e8-e035-4db5-a126-cef5026e8956");
-//        int i = PipeTopo.lines.indexOf(line);
-//        PipeLine problemLine = PipeTopo.lines.get(i);
+//        PipeLine line = new PipeLine("2a7f110c-40d2-4679-babc-1473c13cca19");
+//        int i = topo.lines.indexOf(line);
+//        PipeLine problemLine = topo.lines.get(i);
 //        List<PipeNode> relateNodes = problemLine.getNodes();
 //        PipeValves pipeValves = new PipeValves();
 //        for (PipeNode relateNode : relateNodes) {
 //            fmPoints(relateNode, pipeValves);
 //        }
-        for (int i = 0; i < PipeTopo.lines.size(); i++) {
-            PipeLine line = PipeTopo.lines.get(i);
-            int index = PipeTopo.lines.indexOf(line);
-            PipeLine problemLine = PipeTopo.lines.get(index);
-            List<PipeNode> relateNodes = problemLine.getNodes();
+        //判断是否折线上的所有的点间距都在阈值之上
+//        for (int i = 0; i < topo.lines.size(); i++) {
+//            PipeLine line = topo.lines.get(i);
+//            List<PipeNode> nodes = line.getNodes();
+//            for (int j = 0; j < nodes.size() - 1; j++) {
+//                PipeNode node1 = nodes.get(j);
+//                PipeNode node2 = nodes.get(j + 1);
+//                if (Math.abs(node1.point.x - node2.point.x) == 0 && Math.abs(node1.point.y - node2.point.y) == 0) {
+//                    continue;
+//                }
+//                if (Math.abs(node1.point.x - node2.point.x) < 0.04 && Math.abs(node1.point.y - node2.point.y) < 0.04) {
+//                    System.out.println(123);
+//                }
+//            }
+//        }
+
+        for (int i = 0; i < topo.lines.size(); i++) {
+            PipeLine line = topo.lines.get(i);
+            int index = topo.lines.indexOf(line);
+            PipeLine problemLine = topo.lines.get(index);
             PipeValves pipeValves = new PipeValves();
-            for (PipeNode relateNode : relateNodes) {
-                fmPoints(relateNode,pipeValves);
-            }
-            if (pipeValves.valveIds.size() < 2) {
-                System.out.println(123);
-            }
-            PipeTopo.lines.get(i).fmIds = pipeValves.valveIds;
+            fmPoints(problemLine, pipeValves);
+            topo.lines.get(i).fmIds = pipeValves.valveIds;
         }
+        int index = topo.lines.indexOf(new PipeLine("2a7f110c-40d2-4679-babc-1473c13cca19"));
+        PipeLine line = topo.lines.get(index);
+        try {
+            FileOutputStream fos = new FileOutputStream("../topo.txt");
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(topo);
+            oos.flush();
+            oos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         System.out.println(123);
     }
 
-    public static void fmPoints(PipeNode node, PipeValves valves) {
-        if (!valves.solvedNodeIds.contains(node.point)) {
+     public static void fmPoints(PipeLine line, PipeValves valves) {
+        List<PipeNode> nodes = line.getNodes();
+        valves.solvedLineIds.add(line.getId());
+        for (PipeNode node : nodes) {
             if (node.getId() != null) {
                 valves.valveIds.add(node.getId());
             } else {
-                Set<PipeLine> lines = node.getLines();
-                for (PipeLine line : lines) {
-                    if (!valves.solvedLineIds.contains(line.getId())) {
-                        valves.solvedLineIds.add(line.getId());
-                        List<PipeNode> nodes = line.getNodes();
-                        for (PipeNode pipeNode : nodes) {
-                            fmPoints(pipeNode, valves);
-                            valves.solvedNodeIds.add(node.point);
-                        }
+                fmPoints(node, valves);
+            }
+        }
+    }
+
+
+    /**
+     * @param node   节点
+     * @param valves 数据结果
+     */
+    public static void fmPoints(PipeNode node, PipeValves valves) {
+        Set<PipeLine> lineSet = node.getLines();
+        for (PipeLine line : lineSet) {
+            if (!valves.solvedLineIds.contains(line.getId())) {
+                valves.solvedLineIds.add(line.getId());
+                List<PipeNode> nodes = line.getNodes();
+                //如果分支线段中的第一个点不是触发点,则由此点开始，向两端发射
+                int index = nodes.indexOf(node);
+                for (int i = index; i >= 0; i--) {
+                    PipeNode pipeNode = nodes.get(i);
+                    fmPoints(pipeNode, valves);
+                    if (pipeNode.getId() != null) {
+                        valves.valveIds.add(pipeNode.getId());
+                        break;
+                    }
+                }
+                for (int i = index; i < nodes.size(); i++) {
+                    PipeNode pipeNode = nodes.get(i);
+                    fmPoints(pipeNode, valves);
+                    if (pipeNode.getId() != null) {
+                        valves.valveIds.add(pipeNode.getId());
+                        break;
                     }
                 }
             }
         }
+
+
+//        if (!valves.solvedNodeIds.contains(node.point)) {
+//            if (node.getId() != null) {
+//                valves.valveIds.add(node.getId());
+//            } else {
+//                Set<PipeLine> lines = node.getLines();
+//                for (PipeLine line : lines) {
+////                    List<PipeNode> nodes = line.getNodes();
+////                    for (PipeNode pipeNode : nodes) {
+////                        fmPoints(pipeNode, valves);
+////                        valves.solvedNodeIds.add(node.point);
+////                    }
+//
+//                    //如何确定点的顺序，
+//                    if (!valves.solvedLineIds.contains(line.getId())) {
+//                        valves.solvedLineIds.add(line.getId());
+//                        List<PipeNode> nodes = line.getNodes();
+//                        for (PipeNode pipeNode : nodes) {
+//                            fmPoints(pipeNode, valves);
+//                            valves.solvedNodeIds.add(node.point);
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 }

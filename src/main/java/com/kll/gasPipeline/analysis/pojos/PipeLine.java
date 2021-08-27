@@ -4,11 +4,14 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTReader;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class PipeLine {
+public class PipeLine implements Serializable {
+    private static final long serialVersionUID = 4359709211352400088L;
     private Map<String, Object> prop;
     private List<PipeNode> nodes;
+    private Coordinate[] coordinates;
     private String wkt;
     private String id;
     public Set<String> fmIds;
@@ -17,24 +20,11 @@ public class PipeLine {
         this.prop = prop;
         wkt = (String) prop.get("the_geom");
         id = (String) prop.get("标识码");
+        nodes = new ArrayList<>();
         try {
             WKTReader reader = new WKTReader();
             Geometry geometry = reader.read(wkt);
-            Coordinate[] coordinates = geometry.getCoordinates();
-            nodes = new ArrayList<>();
-            for (Coordinate coordinate : coordinates) {
-                PipeNode node = new PipeNode(coordinate);
-                int i = PipeTopo.nodes.indexOf(node);
-                if (i != -1) {
-                    PipeTopo.nodes.get(i).addLine(this);
-                    nodes.add(PipeTopo.nodes.get(i));
-                } else{
-                    node.addLine(this);
-                    PipeTopo.nodes.add(node);
-                    nodes.add(node);
-                }
-            }
-            PipeTopo.lines.add(this);
+            coordinates = geometry.getCoordinates();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -61,6 +51,14 @@ public class PipeLine {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Coordinate[] getCoordinates() {
+        return coordinates;
+    }
+
+    public void setCoordinates(Coordinate[] coordinates) {
+        this.coordinates = coordinates;
     }
 
     @Override

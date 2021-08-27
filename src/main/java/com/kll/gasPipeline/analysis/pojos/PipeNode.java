@@ -4,13 +4,16 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTReader;
 
+import java.io.Serializable;
 import java.util.*;
 
 
 /**
  * 重写了hashcode 以及equals方法，保证当point相同时，node即为相同（x,y）
  */
-public class PipeNode {
+public class PipeNode implements Serializable {
+    private static final long serialVersionUID = 4359709211352400088L;
+
     public Point3D point;
     private Map<String, Object> prop;
     private Set<PipeLine> lines;
@@ -33,11 +36,6 @@ public class PipeNode {
             Coordinate[] coordinates = geometry.getCoordinates();
             point = new Point3D(coordinates[0], 2);
             id = (String) prop.get("标识码");
-            int i = PipeTopo.nodes.indexOf(this);
-            if (i != -1) {
-                PipeTopo.nodes.get(i).prop = prop;
-                PipeTopo.nodes.get(i).id = id;
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }

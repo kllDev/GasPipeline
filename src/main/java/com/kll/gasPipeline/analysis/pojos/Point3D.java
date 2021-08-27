@@ -25,10 +25,10 @@ public class Point3D extends Coordinate {
         //判断两个点误差是否在一定范围内
         //      点判断相同的条件（不考虑同xy，不同z存在两个点）
         Point3D otherPoint = (Point3D) other;
-        if (Math.abs(x - otherPoint.x) > 0.02) {
+        if (Math.abs(x - otherPoint.x) > 0.05) {
             return false;
         }
-        if (Math.abs(y - otherPoint.y) > 0.02) {
+        if (Math.abs(y - otherPoint.y) > 0.05) {
             return false;
         }
 //        if (z - other.z > 0.001) {
