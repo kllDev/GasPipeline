@@ -18,10 +18,10 @@ public class ReadShapes {
     public static void main(String[] args) throws Exception {
         PipeTopo topo = new PipeTopo();
         List<String> paths = new ArrayList<>();
-        paths.add("F:\\data\\shape\\天然气低压穿越.shp");
-        paths.add("F:\\data\\shape\\天然气低压架空.shp");
-        paths.add("F:\\data\\shape\\天然气低压桥管.shp");
-        paths.add("F:\\data\\shape\\天然气低压直埋.shp");
+//        paths.add("F:\\data\\shape\\天然气低压穿越.shp");
+//        paths.add("F:\\data\\shape\\天然气低压架空.shp");
+//        paths.add("F:\\data\\shape\\天然气低压桥管.shp");
+//        paths.add("F:\\data\\shape\\天然气低压直埋.shp");
         paths.add("F:\\data\\shape\\天然气中压B穿越.shp");
         paths.add("F:\\data\\shape\\天然气中压B架空.shp");
         paths.add("F:\\data\\shape\\天然气中压B桥管.shp");
@@ -80,26 +80,34 @@ public class ReadShapes {
 //            }
 //        }
 
-        for (int i = 0; i < topo.lines.size(); i++) {
-            PipeLine line = topo.lines.get(i);
-            int index = topo.lines.indexOf(line);
-            PipeLine problemLine = topo.lines.get(index);
-            PipeValves pipeValves = new PipeValves();
-            fmPoints(problemLine, pipeValves);
-            topo.lines.get(i).fmIds = pipeValves.valveIds;
-        }
-        int index = topo.lines.indexOf(new PipeLine("2a7f110c-40d2-4679-babc-1473c13cca19"));
-        PipeLine line = topo.lines.get(index);
-        try {
-            FileOutputStream fos = new FileOutputStream("../topo.txt");
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(topo);
-            oos.flush();
-            oos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
+//        for (int i = 0; i < topo.lines.size(); i++) {
+//            PipeLine line = topo.lines.get(i);
+//            int index = topo.lines.indexOf(line);
+//            PipeLine problemLine = topo.lines.get(index);
+//            PipeValves pipeValves = new PipeValves();
+//            fmPoints(problemLine, pipeValves);
+//            topo.lines.get(i).fmIds = pipeValves.valveIds;
+//        }
+//        int index = topo.lines.indexOf(new PipeLine("2a7f110c-40d2-4679-babc-1473c13cca19"));
+//        PipeLine line = topo.lines.get(index);
+//        try {
+//            FileOutputStream fos = new FileOutputStream("../topo.txt");
+//            ObjectOutputStream oos = new ObjectOutputStream(fos);
+//            oos.writeObject(topo);
+//            oos.flush();
+//            oos.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        System.out.println(123);
+
+        System.out.println(System.currentTimeMillis());
+        String personJson = JacksonUtils.serialize(topo);
+        System.out.println(System.currentTimeMillis());
+        PipeTopo deserialize = JacksonUtils.deserialize(personJson, PipeTopo.class);
+        System.out.println(System.currentTimeMillis());
         System.out.println(123);
     }
 
